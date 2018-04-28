@@ -51,7 +51,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include "AnalyzeHighPTMuons/Analysis/include/FillHighPTInfo.h"
+#include "HighPTMuons/Analysis/include/FillHighPTInfo.h"
 
 //
 // class declaration

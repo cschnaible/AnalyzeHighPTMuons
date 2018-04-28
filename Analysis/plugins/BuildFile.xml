@@ -12,7 +12,7 @@
 <use name="root"/>
 <use name="rootcore"/>
  
-<use name="AnalyzeHighPTMuons/Analysis"/>
+<use name="HighPTMuons/Analysis"/>
  
 <library name="AnalyzeTracks" file="AnalyzeTracks.cc">
 </library>
