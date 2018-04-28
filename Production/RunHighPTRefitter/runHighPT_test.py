@@ -24,7 +24,7 @@ process.load('DQMOffline.Configuration.DQMOfflineMC_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-		input = cms.untracked.int32(500)
+		input = cms.untracked.int32(5)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -35,9 +35,9 @@ process.options = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring('file:RelValZpMM.root'),
-    #fileNames = cms.untracked.vstring('file:RelValZMM.root'),
-    fileNames = cms.untracked.vstring('file:muonMC_10_1500_full.root'),
+    #fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/RelValZpMM.root'),
+    #fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/RelValZMM.root'),
+    fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/muonMC_10_1500_full.root'),
     secondaryFileNames = cms.untracked.vstring(),
 	#eventsToProcess = cms.untracked.VEventRange('1:7:623','1:32:3141','1:33:3257')
 	#eventsToProcess = cms.untracked.VEventRange('1:7:623')
@@ -68,7 +68,6 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0)
 )
 
-
 # Additional output definition
 
 # Other statements
@@ -77,8 +76,6 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 #process.GlobalTag = GlobalTag(process.GlobalTag, '92X_mcRun2_asymptotic_v2', '')
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-
-#process.load("RecoMuon.GlobalMuonProducer.tevMuons_cff")
 process.load("RecoMuon.GlobalMuonProducer.highPT_cff")
 
 # Reduce min hits in KF Fitter to 1
@@ -89,14 +86,8 @@ process.highPTMuonsRefit = process.highPTMuons.clone()
 process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('trackRank')
 process.highPTMuonsRefit.UtilitiesParameters.trackRankFactor = cms.double(1.)
 
-# do tracker only refit
-#process.tevTrackerRefit = process.tevMuons.clone()
-#process.tevTrackerRefit.RefitIndex = cms.vint32(6)
-#process.tevTrackerRefit.Refits = cms.vstring('trackerRefit')
-#process.tevTrackerRefit.RefitterParameters.printStuff = cms.bool(False)
-
 # Path and EndPath definitions
-process.p = cms.Path(process.highPTMuonsRefit)# * process.tevTrackerRefit)
+process.p = cms.Path(process.highPTMuonsRefit)
 
 
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
