@@ -113,6 +113,9 @@ void FillCombinationInfo::fill(const reco::Track& tracker, const reco::Track& re
 	}
 	AlgebraicSymMatrix55 corrComb = ROOT::Math::Similarity(diagCovComb,covComb);
 
+	K = (parRef[0]/covRef[0][0] + parTrk[0]/covTrk[0][0]) / (1./covRef[0][0] + 1./covTrk[0][0]);
+	K_err = 1. / (1./covRef[0][0] + 1./covTrk[0][0]);
+
 	// save stuff
 	AlgebraicVector5 parComb = covComb * (wTrk*parTrk + wRef*parRef);
 	for (int i=0; i<5; i++) {

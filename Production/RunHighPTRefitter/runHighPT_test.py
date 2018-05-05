@@ -5,7 +5,63 @@
 # with command line options: step3 --datatier GEN-SIM-RECO,DQMIO --conditions auto:run1_mc -s RAW2DIGI,L1Reco,RECO,EI,VALIDATION:@standardValidationNoHLT,DQM:@standardDQMFakeHLT --eventcontent RECOSIM,DQM -n 100 --filein file:step2.root --fileout file:step3.root
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process('RECO2')
+process = cms.Process('RECO3')
+
+options = VarParsing.VarParsing()
+options.register('selector',\
+		'curvPull',\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.string,\
+		'Selector for best combinatoric refit (curvPull is default)')
+options.register('MC',\
+		'muonMC',\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.string,\
+		'MC to run on : ZpMM, ZMM, or muonMC (default)')
+options.register('extra',\
+		'',\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.string,\
+		'Extra name to append to output file')
+options.register('rankfactor',\
+		1.,\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.float,\
+		'Track rank = NHits * rankfactor - chi2')
+options.register('maxEvents',\
+		-1,\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.int,\
+		'Maximum number of events to run')
+options.parseArguments()
+
+# some checks
+selectors = ['dxy','curvPull','TEST','trackRank']
+if options.selector not in selectors:
+	raise ValueError(options.selector+' is not a valid selector')
+
+# Set input file name
+inputDir = 'file:/scratch3/HighPT/data/'
+filename = ''
+if options.MC=='ZpMM':
+	filename = 'RelValZpMM.root'
+elif options.MC = 'ZMM': 
+	filename = 'RelValZMM.root'
+elif options.MC = 'muonMC':
+	filename = 'muonMC_10_1500_pruned.root'
+else:
+	raise ValueError(options.MC+' is not a valid MC')
+if options.selector=='trackRank':
+	extra = '_f'+str(options.rankfactor)
+else:
+	extra options.extra
+inputFile = inputDir+filename
+# Set output file name
+outputFile = 'highPT_refits_'+options.MC+\
+		('_'+options.selector)+\
+		('_'+extra if extra else '')+\
+		'.root'
+
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -24,7 +80,8 @@ process.load('DQMOffline.Configuration.DQMOfflineMC_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-		input = cms.untracked.int32(5)
+		input = cms.untracked.int32(94000)
+		# Somewhere above 94000 there is a seg fault...
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -35,14 +92,13 @@ process.options = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/RelValZpMM.root'),
-    #fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/RelValZMM.root'),
-    fileNames = cms.untracked.vstring('file:/scratch3/HighPT/data/muonMC_10_1500_full.root'),
+	fileNames = cms.untracked.vstring(inputFile),
     secondaryFileNames = cms.untracked.vstring(),
 	#eventsToProcess = cms.untracked.VEventRange('1:7:623','1:32:3141','1:33:3257')
 	#eventsToProcess = cms.untracked.VEventRange('1:7:623')
 	#eventsToProcess = cms.untracked.VEventRange('1:32:3141')
 	#eventsToProcess = cms.untracked.VEventRange('1:33:3257')
+	#eventsToProcess = cms.untracked.VEventRange('1:38:3770') # this one sucks
 )
 
 # Output definition
@@ -55,14 +111,9 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     #fileName = cms.untracked.string('highPT_refits_ZpMM_test.root'),
     #fileName = cms.untracked.string('highPT_refits_ZMM_test.root'),
-	#fileName = cms.untracked.string('highPT_refits_muonMC_10_1500.root'),
-	#fileName = cms.untracked.string('badevent_r1_l7_e623_outsideIn.root'),
-	#fileName = cms.untracked.string('badevent_r1_l32_e3141.root'),
-	#fileName = cms.untracked.string('highPT_refits_muonMC_10_1500_noRPChits.root'),
-	#fileName = cms.untracked.string('bleh.root'),
-	#fileName = cms.untracked.string('badevent_r1_l7_e623_outsideIn_test.root'),
-	fileName = cms.untracked.string('highPT_test.root'),
-	#fileName = cms.untracked.string('highPT_refits_muonMC_1hit_outIn.root'),
+	#fileName = cms.untracked.string('highPT_refits_muonMC_curvPull.root'),
+	fileName = cms.untracked.string(outputFile),
+	#fileName = cms.untracked.string('highPT_muonMC_f35.root'),
 	# This forces output to be only 'official' recipe modules
     #outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
@@ -72,23 +123,36 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '92X_mcRun2_asymptotic_v2', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+if options.MC=='ZpMM':
+	process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
+elif options.MC=='ZMM':
+	process.GlobalTag = GlobalTag(process.GlobalTag, '92X_mcRun2_asymptotic_v2', '')
+elif options.MC=='muonMC':
+	process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
+else:
+	raise ValueError(options.MC+' is not a valid MC')
 
+process.load("RecoMuon.GlobalMuonProducer.tevMuons_cff")
 process.load("RecoMuon.GlobalMuonProducer.highPT_cff")
 
 # Reduce min hits in KF Fitter to 1
 process.KFFitterForRefitInsideOut.minHits = cms.int32(1)
 process.KFFitterForRefitOutsideIn.minHits = cms.int32(1)
 
+# Muon-only refits
 process.highPTMuonsRefit = process.highPTMuons.clone()
-process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('trackRank')
-process.highPTMuonsRefit.UtilitiesParameters.trackRankFactor = cms.double(1.)
+process.highPTMuonsRefit.Refits = cms.vstring('default','firstHit','picky','dyt','combinatoric')
+process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string(options.selector)
+#process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('TEST')
+#process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('dxy')
+#process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('curvPull')
+#process.highPTMuonsRefit.UtilitiesParameters.Selector = cms.string('trackRank')
+# always set but not always used
+process.highPTMuonsRefit.UtilitiesParameters.trackRankFactor = cms.double(options.rankfactor)
+
 
 # Path and EndPath definitions
 process.p = cms.Path(process.highPTMuonsRefit)
-
 
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 

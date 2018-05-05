@@ -23,15 +23,22 @@ class pyTree(object):
 	Class dedicated to converting all stl vectors into numpy objects
 	'''
 	def __init__(self,t,DecList=[\
-				'global','global_refit','global_refit_noUpdate','global_comb',\
-				'picky','picky_refit','picky_refit_noUpdate','picky_comb',\
-				'tracker','standAlone','gen']
+				'global','globalMuonOnly','globalMuonOnlyUpdate','globalComb',\
+				'picky','pickyMuonOnly','pickyMuonOnlyUpdate','pickyComb',\
+				'tpfms','tpfmsMuonOnly','tpfmsMuonOnlyUpdate','tpfmsComb',\
+				'dyt','dytMuonOnly','dytMuonOnlyUpdate','dytComb',\
+				'bestMuonOnly','bestMuonOnlyUpdate','bestComb',\
+				'tracker','standAlone','gen',\
+				'globalNoRPC','pickyNoRPC','tpfmsNoRPC','dytNoRPC']
 			):
 		bad = False
 		trackList = DecList[:]
 		trackList.remove('gen')
 		for track in trackList:
-			if len(getattr(t,track+'_par')) < 5: bad = True
+			if len(getattr(t,track+'_par')) < 5: 
+				setattr(self,track+'_bad',True)
+			else:
+				setattr(self,track+'_bad',False)
 			#if getattr(t,track+'_par')[0] < -998: bad = True
 			setattr(self,track+'_par',  np.array(getattr(t,track+'_par')))
 			setattr(self,track+'_cov',  np.matrix(getattr(t,track+'_cov')))
@@ -40,8 +47,8 @@ class pyTree(object):
 			setattr(self,track+'_chi2', getattr(t,track+'_chi2'))
 			if hasattr(t,track+'_nValidHits'):
 				setattr(self,track+'_nValidHits', getattr(t,track+'_nValidHits'))
-			if hasattr(t,track+'_nLostHits'):
-				setattr(self,track+'_nLostHits', getattr(t,track+'_nLostHits'))
+#			if hasattr(t,track+'_nLostHits'):
+#				setattr(self,track+'_nLostHits', getattr(t,track+'_nLostHits'))
 			if hasattr(t,track+'_pos'):
 				setattr(self,track+'_pos', np.array(getattr(t,track+'_pos')))
 			if hasattr(t,track+'_mom'):
@@ -61,7 +68,6 @@ class pyTree(object):
 			self.gen_eta = t.gen_eta
 			self.gen_phi = t.gen_phi
 			self.gen_pt = t.gen_pt
-		self.allOkay = True if bad==False else False
 		self.run = t.run
 		self.lumi = t.lumi
 		self.event = t.event
@@ -69,9 +75,13 @@ class pyTree(object):
 class Track(object):
 	def __init__(self,track,pyTree):
 		if track not in [\
-				'global','global_refit','global_comb','global_refit_noUpdate',\
-				'picky','picky_refit','picky_comb','picky_refit_noUpdate',\
-				'tracker','standAlone']:
+				'global','globalMuonOnly','globalMuonOnlyUpdate','globalComb',\
+				'picky','pickyMuonOnly','pickyMuonOnlyUpdate','pickyComb',\
+				'tpfms','tpfmsMuonOnly','tpfmsMuonOnlyUpdate','tpfmsComb',\
+				'dyt','dytMuonOnly','dytMuonOnlyUpdate','dytComb',\
+				'bestMuonOnly','bestMuonOnlyUpdate','bestComb',\
+				'tracker','standAlone',\
+				'globalNoRPC','pickyNoRPC','tpfmsNoRPC','dytNoRPC']:
 			raise NameError(track+' is not a valid track name')
 		self._trackType = track
 		self.__parList = ['K','lambda','phi','dxy','dsz']
@@ -80,10 +90,17 @@ class Track(object):
 		self._w    = getattr(pyTree,track+'_w')
 		self._corr = getattr(pyTree,track+'_corr')
 		self._chi2 = getattr(pyTree,track+'_chi2')
-		if track in ['global','picky','global_refit_noUpdate','picky_refit_noUpdate',\
-				'tracker','standAlone']:
+		self._bad = getattr(pyTree,track+'_bad')
+		if track in [
+				'global','globalMuonOnly','globalMuonOnlyUpdate',\
+				'picky','pickyMuonOnly','pickyMuonOnlyUpdate',\
+				'tpfms','tpfmsMuonOnly','tpfmsMuonOnlyUpdate',\
+				'dyt','dytMuonOnly','dytMuonOnlyUpdate',\
+				'bestMuonOnly','bestMuonOnlyUpdate',\
+				'tracker','standAlone',\
+				'globalNoRPC','pickyNoRPC','tpfmsNoRPC','dytNoRPC']:
 			self._nValidHits = getattr(pyTree,track+'_nValidHits')
-			self._nLostHits = getattr(pyTree,track+'_nLostHits')
+			#self._nLostHits = getattr(pyTree,track+'_nLostHits')
 			self._pos = getattr(pyTree,track+'_pos')
 			self._mom = getattr(pyTree,track+'_mom')
 			self._ndof = getattr(pyTree,track+'_ndof')
@@ -93,7 +110,7 @@ class Track(object):
 			self._dszPV = getattr(pyTree,track+'_dszPV')
 		else:
 			self._nValidHits = -1
-			self._nLostHits = -1
+			#self._nLostHits = -1
 			self._pos = np.array([-999,-999,-999])
 			self._mom = np.array([-999,-999,-999])
 			self._ndof = -1
@@ -125,7 +142,7 @@ class Track(object):
 	def pos(self,i): return self._pos[i]
 	def mom(self,i): return self._mom[i]
 	def nValidHits(self): return self._nValidHits
-	def nLostHits(self): return self._nLostHits
+	#def nLostHits(self): return self._nLostHits
 	def chi2(self): return self._chi2
 	def ndof(self): return self._ndof
 
@@ -152,7 +169,7 @@ class Track(object):
 		out += 'Track pT  = {:11.4e}\n'.format(self.pt())
 		out += 'Track eta = {:4.2f}\n'.format(self.eta())
 		out += 'Number of valid hits {:2}\n'.format(self._nValidHits)
-		out += 'Number of lost hits  {:2}\n'.format(self._nLostHits)
+		#out += 'Number of lost hits  {:2}\n'.format(self._nLostHits)
 		return out
 
 def pos_diff(pos1,pos2):

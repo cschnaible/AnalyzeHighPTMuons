@@ -81,18 +81,22 @@ class AnalyzeTracks : public edm::EDAnalyzer {
 
 	  edm::EDGetTokenT<AssocTrackToTrack> trackerOnlyMapToken_;
 
+		edm::EDGetTokenT<AssocTrackToTrack> globalNoRPCToken_;
 		edm::EDGetTokenT<AssocTrackToTrack> globalMuonOnlyMapToken_;
 		edm::EDGetTokenT<AssocTrackToTrack> globalMuonOnlyUpdateMapToken_;
 
 	  edm::EDGetTokenT<AssocTrackToTrack> pickyMapToken_;
+		edm::EDGetTokenT<AssocTrackToTrack> pickyNoRPCToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> pickyMuonOnlyMapToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> pickyMuonOnlyUpdateMapToken_;
 
 	  edm::EDGetTokenT<AssocTrackToTrack> dytMapToken_;
+		edm::EDGetTokenT<AssocTrackToTrack> dytNoRPCToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> dytMuonOnlyMapToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> dytMuonOnlyUpdateMapToken_;
 
 	  edm::EDGetTokenT<AssocTrackToTrack> tpfmsMapToken_;
+		edm::EDGetTokenT<AssocTrackToTrack> tpfmsNoRPCToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> tpfmsMuonOnlyMapToken_;
 	  edm::EDGetTokenT<AssocTrackToTrack> tpfmsMuonOnlyUpdateMapToken_;
 
@@ -109,6 +113,7 @@ class AnalyzeTracks : public edm::EDAnalyzer {
 		FillTrackInfo pickyInfo,  pickyMuonOnlyInfo,  pickyMuonOnlyUpdateInfo;
 		FillTrackInfo dytInfo,    dytMuonOnlyInfo,    dytMuonOnlyUpdateInfo;
 		FillTrackInfo tpfmsInfo,  tpfmsMuonOnlyInfo,  tpfmsMuonOnlyUpdateInfo;
+		FillTrackInfo globalNoRPCInfo, pickyNoRPCInfo, dytNoRPCInfo, tpfmsNoRPCInfo;
 		FillTrackInfo bestMuonOnlyInfo, bestMuonOnlyUpdateInfo;
 		FillTrackInfo standAloneInfo,   trackerInfo;
 		FillCombinationInfo globalMuonOnlyUpdateTrackerCombInfo;
@@ -138,6 +143,10 @@ AnalyzeTracks::AnalyzeTracks(const edm::ParameterSet& iConfig) :
 	, tpfmsInfo(tree,"tpfms")
 	, tpfmsMuonOnlyInfo(tree,"tpfmsMuonOnly")
 	, tpfmsMuonOnlyUpdateInfo(tree,"tpfmsMuonOnlyUpdate")
+	, globalNoRPCInfo(tree,"globalNoRPC")
+	, pickyNoRPCInfo(tree,"pickyNoRPC")
+	, dytNoRPCInfo(tree,"dytNoRPC")
+	, tpfmsNoRPCInfo(tree,"tpfmsNoRPC")
 	, bestMuonOnlyInfo(tree,"bestMuonOnly")
 	, bestMuonOnlyUpdateInfo(tree,"bestMuonOnlyUpdate")
 	, standAloneInfo(tree,"standAlone")
@@ -160,6 +169,8 @@ AnalyzeTracks::AnalyzeTracks(const edm::ParameterSet& iConfig) :
 	trackerOnlyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("trackerMapTag"));
 
+	globalNoRPCToken_ = 
+		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("globalNoRPCMapTag"));
 	globalMuonOnlyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("globalMuonOnlyMapTag"));
 	globalMuonOnlyUpdateMapToken_ = 
@@ -167,6 +178,8 @@ AnalyzeTracks::AnalyzeTracks(const edm::ParameterSet& iConfig) :
 
 	pickyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("pickyMapTag"));
+	pickyNoRPCToken_ = 
+		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("pickyNoRPCMapTag"));
 	pickyMuonOnlyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("pickyMuonOnlyMapTag"));
 	pickyMuonOnlyUpdateMapToken_ = 
@@ -174,6 +187,8 @@ AnalyzeTracks::AnalyzeTracks(const edm::ParameterSet& iConfig) :
 
 	dytMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("dytMapTag"));
+	dytNoRPCToken_ = 
+		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("dytNoRPCMapTag"));
 	dytMuonOnlyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("dytMuonOnlyMapTag"));
 	dytMuonOnlyUpdateMapToken_ = 
@@ -181,6 +196,8 @@ AnalyzeTracks::AnalyzeTracks(const edm::ParameterSet& iConfig) :
 
 	tpfmsMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("tpfmsMapTag"));
+	tpfmsNoRPCToken_ = 
+		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("tpfmsNoRPCMapTag"));
 	tpfmsMuonOnlyMapToken_ = 
 		consumes<AssocTrackToTrack>(iConfig.getParameter<edm::InputTag>("tpfmsMuonOnlyMapTag"));
 	tpfmsMuonOnlyUpdateMapToken_ = 
@@ -239,6 +256,9 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	edm::Handle<AssocTrackToTrack> trackerOnlyTracks;
 	iEvent.getByToken(trackerOnlyMapToken_,trackerOnlyTracks);
 
+	// Global No RPC track
+	edm::Handle<AssocTrackToTrack> globalNoRPCTracks;
+	iEvent.getByToken(globalNoRPCToken_,globalNoRPCTracks);
 	// Global muon-only track
 	edm::Handle<AssocTrackToTrack> globalMuonOnlyTracks;
 	iEvent.getByToken(globalMuonOnlyMapToken_,globalMuonOnlyTracks);
@@ -249,6 +269,9 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// picky track
 	edm::Handle<AssocTrackToTrack> pickyTracks;
 	iEvent.getByToken(pickyMapToken_,pickyTracks);
+	// picky No RPC track
+	edm::Handle<AssocTrackToTrack> pickyNoRPCTracks;
+	iEvent.getByToken(pickyNoRPCToken_,pickyNoRPCTracks);
 	// picky muon-only track
 	edm::Handle<AssocTrackToTrack> pickyMuonOnlyTracks;
 	iEvent.getByToken(pickyMuonOnlyMapToken_,pickyMuonOnlyTracks);
@@ -259,6 +282,9 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// dyt track
 	edm::Handle<AssocTrackToTrack> dytTracks;
 	iEvent.getByToken(dytMapToken_,dytTracks);
+	// dyt No RPC track
+	edm::Handle<AssocTrackToTrack> dytNoRPCTracks;
+	iEvent.getByToken(dytNoRPCToken_,dytNoRPCTracks);
 	// dyt muon-only track
 	edm::Handle<AssocTrackToTrack> dytMuonOnlyTracks;
 	iEvent.getByToken(dytMuonOnlyMapToken_,dytMuonOnlyTracks);
@@ -269,6 +295,9 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// tpfms track
 	edm::Handle<AssocTrackToTrack> tpfmsTracks;
 	iEvent.getByToken(tpfmsMapToken_,tpfmsTracks);
+	// tpfms No RPC track
+	edm::Handle<AssocTrackToTrack> tpfmsNoRPCTracks;
+	iEvent.getByToken(tpfmsNoRPCToken_,tpfmsNoRPCTracks);
 	// tpfms muon-only track
 	edm::Handle<AssocTrackToTrack> tpfmsMuonOnlyTracks;
 	iEvent.getByToken(tpfmsMuonOnlyMapToken_,tpfmsMuonOnlyTracks);
@@ -318,7 +347,7 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  globalUsed.push_back(glb);
 			globalInfo.fill((*globalTracks)[glb],beamSpot,PV);
 
-		  // Match Mu-only tracker track with update to tracker track
+		  // Match tracker track to global track
 		  AssocTrackToTrack const & trackerMap = *trackerOnlyTracks;
 		  try {
 			  auto trackerTrack = 
@@ -327,6 +356,16 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				doComb = true;
 		  } catch(...) {
 			  std::cout << "Could not match muon-only tracker track with update to tracker track" << std::endl;
+		  }
+		  
+		  // Match no rpc global track to global track
+		  AssocTrackToTrack const & globalNoRPCMap = *globalNoRPCTracks;
+		  try {
+		    auto globalNoRPCTrack = 
+					*globalNoRPCMap[edm::Ref<std::vector<reco::Track>>(globalTracks,glb)];
+				globalNoRPCInfo.fill(globalNoRPCTrack,beamSpot,PV);
+		  } catch(...) {
+				std::cout << "Could not match no rpc global track glb track?" << std::endl;
 		  }
 		  
 		  // Match Mu-only global track to global track
@@ -359,6 +398,16 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  } catch(...) {
 				std::cout << "Could not match picky track to glb track?" << std::endl;
 		  }
+		  
+		  // Match no rpc picky track to global track
+		  AssocTrackToTrack const & pickyNoRPCMap = *pickyNoRPCTracks;
+		  try {
+		    auto pickyNoRPCTrack = 
+					*pickyNoRPCMap[edm::Ref<std::vector<reco::Track>>(globalTracks,glb)];
+				pickyNoRPCInfo.fill(pickyNoRPCTrack,beamSpot,PV);
+		  } catch(...) {
+				std::cout << "Could not match no rpc picky track glb track?" << std::endl;
+		  }
 
 		  // Match Mu-only picky track to global track
 		  AssocTrackToTrack const & pickyMuonOnlyMap = *pickyMuonOnlyTracks;
@@ -390,6 +439,16 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  } catch(...) {
 				std::cout << "Could not match dyt track to glb track?" << std::endl;
 		  }
+			
+		  // Match no rpc dyt track to global track
+		  AssocTrackToTrack const & dytNoRPCMap = *dytNoRPCTracks;
+		  try {
+		    auto dytNoRPCTrack = 
+					*dytNoRPCMap[edm::Ref<std::vector<reco::Track>>(globalTracks,glb)];
+				dytNoRPCInfo.fill(dytNoRPCTrack,beamSpot,PV);
+		  } catch(...) {
+				std::cout << "Could not match no rpc dyt track glb track?" << std::endl;
+		  }
 
 		  // Match Mu-only dyt track to global track
 		  AssocTrackToTrack const & dytMuonOnlyMap = *dytMuonOnlyTracks;
@@ -420,6 +479,16 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				tpfmsInfo.fill(tpfmsTrack,beamSpot,PV);
 		  } catch(...) {
 				std::cout << "Could not match tpfms track to glb track?" << std::endl;
+		  }
+			
+		  // Match no rpc tpfms track to global track
+		  AssocTrackToTrack const & tpfmsNoRPCMap = *tpfmsNoRPCTracks;
+		  try {
+		    auto tpfmsNoRPCTrack = 
+					*tpfmsNoRPCMap[edm::Ref<std::vector<reco::Track>>(globalTracks,glb)];
+				tpfmsNoRPCInfo.fill(tpfmsNoRPCTrack,beamSpot,PV);
+		  } catch(...) {
+				std::cout << "Could not match no rpc tpfms track glb track?" << std::endl;
 		  }
 
 		  // Match Mu-only tpfms track to global track
@@ -481,7 +550,7 @@ AnalyzeTracks::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				if (doCombDYT) {
 					auto dytMuonOnlyUpdateTrack = 
 						*dytMuonOnlyUpdateMap[edm::Ref<std::vector<reco::Track>>(globalTracks,glb)];
-					globalMuonOnlyUpdateTrackerCombInfo.fill(trackerTrack, dytMuonOnlyUpdateTrack);
+					dytMuonOnlyUpdateTrackerCombInfo.fill(trackerTrack, dytMuonOnlyUpdateTrack);
 				}
 				if (doCombTPFMS) {
 					auto tpfmsMuonOnlyUpdateTrack = 

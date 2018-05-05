@@ -5,6 +5,7 @@ import numpy as np
 from scipy.stats import norm
 import argparse
 import tools as t
+from HighPT.Analysis.plot_styles import styles
 
 R.gROOT.SetBatch(True)
 R.gStyle.SetPadTickX(1)
@@ -23,60 +24,6 @@ outfilebasename = nametmp+'_base.root'
 outfilename     = nametmp+'.root'
 outFile = R.TFile(outfilename,'recreate')
 RECREATE = args.recreate
-
-
-styles = {
-		'global':{
-			'color':R.kGreen+1,
-			'name':'glb',
-			'pretty':'Global track',
-			},
-		'global_refit':{
-			'color':R.kOrange+1,
-			'name':'glb_ref',
-			'pretty':'Global #mu-only + vtx track',
-			},
-		'global_refit_noUpdate':{
-			'color':R.kBlue,
-			'name':'glb_ref_noUp',
-			'pretty':'Global #mu-only track',
-			},
-		'global_comb':{
-			'color':R.kViolet-3,
-			'name':'glb_comb',
-			'pretty':'Global combination',
-			},
-		'picky':{
-			'color':R.kGreen+3,
-			'name':'pky',
-			'pretty':'picky track',
-			},
-		'picky_refit':{
-			'color':R.kOrange+4,
-			'name':'pky_ref',
-			'pretty':'Picky #mu-only + vtx track',
-			},
-		'picky_refit_noUpdate':{
-			'color':R.kAzure+5,
-			'name':'pky_ref_noUp',
-			'pretty':'Picky #mu-only track',
-			},
-		'picky_comb':{
-			'color':R.kViolet+4,
-			'name':'pky_comb',
-			'pretty':'Picky combination',
-			},
-		'tracker':{
-			'color':R.kRed,
-			'name':'trk',
-			'pretty':'Tracker track',
-			},
-		'standAlone':{
-			'color':R.kGray+1,
-			'name':'sa',
-			'pretty':'Stand-alone track',
-			},
-		}
 
 varList = {
 		# K = q/P

@@ -30,19 +30,10 @@ class HighPTTreeContainer {
 		HighPTTreeContainer(std::string treeName, std::string treeTitle) {
 			edm::Service<TFileService> fs;
 			tree = fs->make<TTree>(TString(treeName),TString(treeTitle));
-			//TFile file;
-			//TTree tree(treeName,treeTitle);
-			//file = new TFile(TString(fileName), "RECREATE");
-			//tree = new TTree(TString(treeName),TString(treeTitle));
 		}
-		void write() {
-			//file->cd();
-			tree->Write();
-			//file->Close();
-			}
+		void write() {tree->Write();}
 		void fill() {tree->Fill();}
 		TTree * tree;
-		//TFile * file;
 };
 
 class FillHighPTInfo {
@@ -54,15 +45,13 @@ class FillHighPTInfo {
 
 		// Book single variable
 		template<class T>
-			//void book(const char *name, T& var, const char *type) {
-			void book(TString name, T& var, TString type) {
-				fTree->tree->Branch(name, &var, name.Append("/").Append(type).Data());
+			void book(std::string name, T& var, std::string type) {
+				fTree->tree->Branch(name.c_str(), &var, (name+"/"+type).c_str());
 			}
 		// Book vector
 		template<class T>
-			//void book(const char *name, std::vector<T>& varv) {
-			void book(TString name, std::vector<T>& varv) {
-				fTree->tree->Branch(name, &varv);
+			void book(std::string name, std::vector<T>& varv) {
+				fTree->tree->Branch(name.c_str(), &varv);
 			}
 
 		HighPTTreeContainer * fTree;
