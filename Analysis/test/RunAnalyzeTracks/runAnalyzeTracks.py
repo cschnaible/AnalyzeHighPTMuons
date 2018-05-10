@@ -38,7 +38,7 @@ inputFile = \
 		'.root'
 outputFile = \
 		options.outputDir+\
-		'AnalyzerTracks_'+\
+		'AnalyzeTracks_'+\
 		options.MC+\
 		('_'+options.selector if options.selector else '')+\
 		('_'+options.extra if options.extra else '')+\

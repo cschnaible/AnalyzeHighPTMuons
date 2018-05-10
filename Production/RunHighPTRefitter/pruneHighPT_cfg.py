@@ -53,19 +53,15 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 		# Select branches to keep
     outputCommands = cms.untracked.vstring(
 			'drop *_*_*_*',
-			'keep *_offlinePrimaryVertices_*_*',
-			'keep *_OfflinePrimaryVerticesBS_*_*',
-			'keep *_generalTracks_*_*',
-			'keep *_globalMuons_*_*',
-			'keep *_refittedStandAloneMuons_*_*',
-			'keep *_standAloneMuons_*_*',
-			'keep *_tevMuons_*_*',
+
+			'keep *_muons_*_*',
 			'keep *_genParticles_*_*',
 			'keep *_generator_*_*',
+
+			'keep *_offlinePrimaryVertices_*_*',
+			'keep *_OfflinePrimaryVerticesBS_*_*',
 			'keep *_offlineBeamSpot_*_*',
-			'keep *_highPTMuonsRefit_*_*',
-			'keep *_tevMuonsNoRPC_*_*',
-			'keep *_trackExtrapolator_*_*',
+
 			'keep *_csc2DRecHits_*_*',
 			'keep *_cscSegments_*_*',
 			'keep *_dt4DSegments_*_*',
@@ -74,6 +70,16 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 			'keep *_dedxHitInfo_*_*',
 			'keep *_siPixelClusters_*_*',
 			'keep *_siStripClusters_*_*',
+
+			'keep *_generalTracks_*_*',
+			'keep *_standAloneMuons_*_*',
+			'keep *_refittedStandAloneMuons_*_*',
+			'keep *_globalMuons_*_*',
+
+			'keep *_trackExtrapolator_*_*',
+			'keep *_tevMuons_*_*',
+			'keep *_tevMuonsNoRPC_*_*',
+			'keep *_highPTMuonsRefit_*_*',
 			'keep *_highPTMuonsTrackerRefit_*_*',
 		),
     splitLevel = cms.untracked.int32(0)
