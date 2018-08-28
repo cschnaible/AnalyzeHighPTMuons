@@ -7,11 +7,11 @@ options.register('MC',\
 		VarParsing.VarParsing.multiplicity.singleton,\
 		VarParsing.VarParsing.varType.string,\
 		'MC to run on : ZpMM, ZMM, or muonMC (default)')
-options.register('selector',\
-		'asdf',\
+options.register('input',\
+		'',\
 		VarParsing.VarParsing.multiplicity.singleton,\
 		VarParsing.VarParsing.varType.string,\
-		'Selector for best combinatoric refit')
+		'Extra name for input ROOT file')
 options.register('inputDir',\
 		'/scratch3/HighPT/CMSSW_9_4_6_patch1/src/HighPTMuons/Production/RunHighPTRefitter/',\
 		VarParsing.VarParsing.multiplicity.singleton,\
@@ -22,26 +22,34 @@ options.register('outputDir',\
 		VarParsing.VarParsing.multiplicity.singleton,\
 		VarParsing.VarParsing.varType.string,\
 		'Directory for output file')
-options.register('extra',\
+options.register('output',\
 		'',\
 		VarParsing.VarParsing.multiplicity.singleton,\
 		VarParsing.VarParsing.varType.string,\
-		'Extra label to put at end of output file name')
+		'Extra name for output ROOT file')
+options.register('correlation',\
+		1.0,\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.float,\
+		'Correlation between lambda, phi, dxy, dsz of mu-only+vtx track and tracker track')
+options.register('covScale',\
+		1.0,\
+		VarParsing.VarParsing.multiplicity.singleton,\
+		VarParsing.VarParsing.varType.float,\
+		'Scale factor applied to mu-only+vtx track covariance')
 options.parseArguments()
 
 inputFile = \
 		options.inputDir+\
 		'highPT_refits_'+\
 		options.MC+\
-		('_'+options.selector if options.selector else '')+\
-		('_'+options.extra if options.extra else '')+\
+		('_'+options.input if options.input else '')+\
 		'.root'
 outputFile = \
 		options.outputDir+\
 		'AnalyzeTracks_'+\
 		options.MC+\
-		('_'+options.selector if options.selector else '')+\
-		('_'+options.extra if options.extra else '')+\
+		('_'+options.output if options.output else '')+\
 		'.root'
 
 print 'Input file :',inputFile
@@ -64,36 +72,42 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 process.analyzer = cms.EDAnalyzer('AnalyzeTracks',
 
+	correlation = cms.double(options.correlation),
+	covScale = cms.double(options.covScale),
+
 	vertices = cms.InputTag('offlinePrimaryVertices'),
 	beamSpot = cms.InputTag('offlineBeamSpot'),
 
+	recoMuons = cms.InputTag('muons'),
 	globalTracks = cms.InputTag('globalMuons'),
 	genParticles = cms.InputTag('genParticles'),
 	standAloneTracks = cms.InputTag('standAloneMuons','UpdatedAtVtx'),
 
 	trackerMapTag = cms.InputTag('highPTMuonsTrackerRefit','tracker'),
 
-	globalNoRPCMapTag = cms.InputTag('tevMuonsNoRPC','default'),
-	globalMuonOnlyMapTag = cms.InputTag('highPTMuonsRefit','default'),
-	globalMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefit','default'),
+	globalMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitStd','default'),
+	globalMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitStd','defaultVtxUpdate'),
 
 	pickyMapTag = cms.InputTag('tevMuons','picky'),
-	pickyNoRPCMapTag = cms.InputTag('tevMuonsNoRPC','picky'),
-	pickyMuonOnlyMapTag = cms.InputTag('highPTMuonsRefit','picky'),
-	pickyMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefit','pickyVtxUpdate'),
+	pickyMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitStd','picky'),
+	pickyMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitStd','pickyVtxUpdate'),
 
 	dytMapTag = cms.InputTag('tevMuons','dyt'),
-	dytNoRPCMapTag = cms.InputTag('tevMuonsNoRPC','dyt'),
-	dytMuonOnlyMapTag = cms.InputTag('highPTMuonsRefit','dyt'),
-	dytMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefit','dytVtxUpdate'),
+	dytMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitStd','dyt'),
+	dytMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitStd','dytVtxUpdate'),
 
 	tpfmsMapTag = cms.InputTag('tevMuons','firstHit'),
-	tpfmsNoRPCMapTag = cms.InputTag('tevMuonsNoRPC','firstHit'),
-	tpfmsMuonOnlyMapTag = cms.InputTag('highPTMuonsRefit','firstHit'),
-	tpfmsMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefit','firstHitVtxUpdate'),
+	tpfmsMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitStd','firstHit'),
+	tpfmsMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitStd','firstHitVtxUpdate'),
 
-	bestMuonOnlyMapTag = cms.InputTag('highPTMuonsRefit','combinatoric'),
-	bestMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefit','combinatoricVtxUpdate'),
+	globalTrackRankMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitGlobalTrackRank','combinatoric'),
+	globalTrackRankMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitGlobalTrackRank','combinatoricVtxUpdate'),
+	pickyTrackRankMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitPickyTrackRank','combinatoric'),
+	pickyTrackRankMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitPickyTrackRank','combinatoricVtxUpdate'),
+	dytTrackRankMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitDYTTrackRank','combinatoric'),
+	dytTrackRankMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitDYTTrackRank','combinatoricVtxUpdate'),
+	tunePTrackRankMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitTunePTrackRank','combinatoric'),
+	tunePTrackRankMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitTunePTrackRank','combinatoricVtxUpdate'),
 
 )
 
@@ -101,3 +115,23 @@ process.source.fileNames = cms.untracked.vstring('file:'+inputFile)
 process.TFileService = cms.Service('TFileService',fileName=cms.string(outputFile))
 
 process.p = cms.Path(process.analyzer)
+
+
+
+
+
+
+
+
+
+
+
+
+#	trkCurvMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitCurvPullTrk','combinatoric'),
+#	trkCurvMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitCurvPullTrk','combinatoricVtxUpdate'),
+#	tunePCurvMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitCurvPullTuneP','combinatoric'),
+#	tunePCurvMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitCurvPullTuneP','combinatoricVtxUpdate'),
+#	dxyMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitDxy','combinatoric'),
+#	dxyMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitDxy','combinatoricVtxUpdate'),
+#	curvRelErrMuonOnlyMapTag = cms.InputTag('highPTMuonsRefitRelCurvErr','combinatoric'),
+#	curvRelErrMuonOnlyUpdateMapTag = cms.InputTag('highPTMuonsRefitRelCurvErr','combinatoricVtxUpdate'),

@@ -9,15 +9,15 @@ R.gStyle.SetPadTickY(1)
 
 MC = 'muonMC'
 
-#selector = 'curvPull'
+selector = 'curvPull'
 #selector = 'dxy'
-f = str(15)
-selector = 'trackRank_f'+f
-extra = ''
+#f = str(15)
+#selector = 'trackRank_f'+f
+extra = 'TEST'
 
 fileDir = '/scratch3/HighPT/CMSSW_9_4_6_patch1/src/HighPTMuons/Analysis/test/RunAnalyzeTracks/'
-#fileName = 'AnalyzeTracks_'+MC+'_'+selector+('_'+extra if extra else '')+'.root'
-fileName = 'AnalyzeTracks_'+MC+'_'+selector+'.root'
+fileName = 'AnalyzeTracks_'+MC+'_'+selector+('_'+extra if extra else '')+'.root'
+#fileName = 'AnalyzeTracks_'+MC+'_'+selector+'.root'
 inputFile = fileDir+fileName
 outputFile = 'hists_curvature_'+MC+'_'+selector+('_'+extra if extra else '')+'.root'
 
@@ -74,7 +74,7 @@ for tracktype in tracktypes:
 		
 
 for l,entry in enumerate(tree):
-	#if l>2000: break
+	if l>50000: break
 	if l%1000==0: print 'Entry {l:>5}\r'.format(**locals())
 	p = t.pyTree(tree)
 	cuts = {

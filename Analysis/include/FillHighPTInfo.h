@@ -97,6 +97,7 @@ class FillTrackInfo : public FillHighPTInfo {
 			FillHighPTInfo(tree),
 			trackType(trackType)	
 	{
+			book(trackType+"_good", good, "B");
 			book(trackType+"_nValidHits", nValidHits, "I");
 			book(trackType+"_nValidMuonHits", nValidMuonHits, "I");
 			book(trackType+"_nValidCSCHits", nValidCSCHits, "I");
@@ -135,8 +136,10 @@ class FillTrackInfo : public FillHighPTInfo {
 		double chi2,K,K_err,phi,eta,theta,dxyBS,dxyPV,dszBS,dszPV,pt;
 		std::vector<double> par, mom, pos;
 		std::vector< std::vector<double> > cov,w,corr;
+		bool good = false;
 		
 		virtual void reset() {
+			good = false;
 			nValidHits = -1;
 			nValidMuonHits = -1;
 			nValidCSCHits = -1;
@@ -168,7 +171,7 @@ class FillTrackInfo : public FillHighPTInfo {
 		
 		public: 
 
-		void fill(const reco::Track& track, const reco::BeamSpot& beamSpot, const reco::Vertex& PV);
+		void fill(const reco::Track& track, const reco::BeamSpot& beamSpot, const reco::Vertex& PV, const float& scaleCov=1.0);
 
 };
 	
@@ -177,33 +180,35 @@ class FillCombinationInfo : public FillHighPTInfo {
 		FillCombinationInfo(HighPTTreeContainer& tree, std::string trackType) : 
 			FillHighPTInfo(tree),trackType(trackType) 
 		{
+			book(trackType+"_good",good,"B");
 			book(trackType+"_K", K, "D");
 			book(trackType+"_K_err", K_err, "D");
 			book(trackType+"_chi2", chi2, "D");
 			book(trackType+"_par", par);
 			book(trackType+"_w", w);
 			book(trackType+"_cov", cov);
-			book(trackType+"_corr", corr);
+			//book(trackType+"_corr", corr);
 		}
 		TString trackType;
 		virtual ~FillCombinationInfo() {};
 	private:
 		double K,K_err,chi2;
 		std::vector<double> par;
-		std::vector< std::vector<double> > w,cov,corr;
+		std::vector< std::vector<double> > w,cov;//,corr;
+		bool good = false;
 
 		virtual void reset() {
+			good = false;
 			K = -999.;
 			K_err = -999.;
 			par.clear();
 			w.clear();
 			cov.clear();
-			corr.clear();
+			//corr.clear();
 		}
 
 	public:
-		void fill(const std::vector<double>& par, const std::vector< std::vector<double> >& cov);
-		void fill(const reco::Track& tracker, const reco::Track& refit);
+		void fill(const reco::Track& tracker, const reco::Track& refit, const float& covScale=1.0, const float& correlation=1.0);
 };
 
 class FillGenInfo : public FillHighPTInfo {

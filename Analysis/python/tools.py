@@ -43,7 +43,7 @@ class pyTree(object):
 			setattr(self,track+'_par',  np.array(getattr(t,track+'_par')))
 			setattr(self,track+'_cov',  np.matrix(getattr(t,track+'_cov')))
 			setattr(self,track+'_w',    np.matrix(getattr(t,track+'_w')))
-			setattr(self,track+'_corr', np.matrix(getattr(t,track+'_corr')))
+			#setattr(self,track+'_corr', np.matrix(getattr(t,track+'_corr')))
 			setattr(self,track+'_chi2', getattr(t,track+'_chi2'))
 			if hasattr(t,track+'_nValidHits'):
 				setattr(self,track+'_nValidHits', getattr(t,track+'_nValidHits'))
@@ -88,7 +88,7 @@ class Track(object):
 		self._par  = getattr(pyTree,track+'_par')
 		self._cov  = getattr(pyTree,track+'_cov')
 		self._w    = getattr(pyTree,track+'_w')
-		self._corr = getattr(pyTree,track+'_corr')
+		#self._corr = getattr(pyTree,track+'_corr')
 		self._chi2 = getattr(pyTree,track+'_chi2')
 		self._bad = getattr(pyTree,track+'_bad')
 		if track in [
@@ -132,7 +132,7 @@ class Track(object):
 	def dszPV(self):    return self._dszPV
 	def cov(self,i,j):  return self._cov[i,j]
 	def w(self,i,j):    return self._w[i,j]
-	def corr(self,i,j): return self._corr[i,j]
+	#def corr(self,i,j): return self._corr[i,j]
 	def eta(self):    
 		if abs(self._par[1])>math.pi/2:
 			return -999.

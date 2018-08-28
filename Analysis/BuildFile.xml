@@ -6,6 +6,7 @@
 <use name="Geometry/Records"/>
 <use name="CommonTools/Statistics"/>
 <use name="DataFormats/Common"/>
+<use name="DataFormats/MuonReco"/>
 <use name="root"/>
 <use name="rootcore"/>
 <use name="RecoMuon/TrackingTools"/>

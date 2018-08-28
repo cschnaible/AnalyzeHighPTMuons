@@ -15,7 +15,7 @@ combine = 'full'
 
 #inputFilename = 'hists_curvature_muonMC_'+selector+('_'+extra if extra else '')+'.root'
 selectors = ['dxy','curvPull','trackRank']
-extras = {'dxy':[''],'curvPull':[''],\
+extras = {'dxy':[''],'curvPull':['TEST',''],\
 		'trackRank':['f1','f3','f5','f10','f15']}
 ptcuts = ['0','200','400','600','800','1000']
 
